@@ -3,7 +3,7 @@
 
 Name:           memcached
 Version:        1.4.4
-Release:        3%{?dist}
+Release:        3%{?dist}.1
 Epoch:		0
 Summary:        High Performance, Distributed Memory Object Cache
 Group:          System Environment/Daemons
@@ -12,6 +12,8 @@ URL:            http://www.memcached.org/
 Source0:        http://memcached.googlecode.com/files/%{name}-%{version}.tar.gz
 # custom init script
 Source1:        memcached.sysv
+Patch1:         memcached-CVE-2016-8704_8705_8706.patch
+
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  libevent-devel
 BuildRequires:  perl(Test::More)
@@ -36,6 +38,7 @@ memcached binary include files.
 
 %prep
 %setup -q
+%patch1 -p1 -b .CVE-2016-8704_8705_8706
 
 %build
 %configure
@@ -121,6 +124,10 @@ exit 0
 %{_includedir}/memcached/*
 
 %changelog
+* Mon Nov 07 2016 Miroslav Lichvar <mlichvar@redhat.com> - 0:1.4.4-3.el6_8.1
+- fix vulnerabilities allowing remote code execution (CVE-2016-8704,
+  CVE-2016-8705, CVE-2016-8706)
+
 * Thu May  6 2010 Joe Orton <jorton@redhat.com> - 0:1.4.4-3
 - don't run the test suite as root (#558913)
 - init script updates for LSB compliance (#571733)
