@@ -3,7 +3,7 @@
 
 Name:           memcached
 Version:        1.4.4
-Release:        3%{?dist}.1
+Release:        5%{?dist}
 Epoch:		0
 Summary:        High Performance, Distributed Memory Object Cache
 Group:          System Environment/Daemons
@@ -12,7 +12,9 @@ URL:            http://www.memcached.org/
 Source0:        http://memcached.googlecode.com/files/%{name}-%{version}.tar.gz
 # custom init script
 Source1:        memcached.sysv
-Patch1:         memcached-CVE-2016-8704_8705_8706.patch
+Patch1:         memcached-maxconns.patch
+Patch2:         memcached-printkey.patch
+Patch3:         memcached-CVE-2016-8704_8705_8706.patch
 
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  libevent-devel
@@ -38,7 +40,9 @@ memcached binary include files.
 
 %prep
 %setup -q
-%patch1 -p1 -b .CVE-2016-8704_8705_8706
+%patch1 -p1 -b .maxconns
+%patch2 -p1 -b .printkey
+%patch3 -p1 -b .CVE-2016-8704_8705_8706
 
 %build
 %configure
@@ -124,9 +128,14 @@ exit 0
 %{_includedir}/memcached/*
 
 %changelog
-* Mon Nov 07 2016 Miroslav Lichvar <mlichvar@redhat.com> - 0:1.4.4-3.el6_8.1
+* Mon Nov 07 2016 Miroslav Lichvar <mlichvar@redhat.com> - 0:1.4.4-5
 - fix vulnerabilities allowing remote code execution (CVE-2016-8704,
   CVE-2016-8705, CVE-2016-8706)
+
+* Thu Sep 08 2016 Miroslav Lichvar <mlichvar@redhat.com> - 0:1.4.4-4
+- fix init script to check for root privileges (#883438)
+- fix race condition when enabling new connections (#902432)
+- fix crash when printing key in verbose mode (#1153902)
 
 * Thu May  6 2010 Joe Orton <jorton@redhat.com> - 0:1.4.4-3
 - don't run the test suite as root (#558913)

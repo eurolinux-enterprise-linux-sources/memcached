@@ -36,6 +36,7 @@ pidfile=${PIDFILE-/var/run/memcached/memcached.pid}
 lockfile=${LOCKFILE-/var/lock/subsys/memcached}
 
 start () {
+	[ "$EUID" != "0" ] && exit 4
 	echo -n $"Starting $prog: "
 	# Ensure that /var/run/memcached has proper permissions
 	if [ "`stat -c %U /var/run/memcached`" != "$USER" ]; then
@@ -48,6 +49,7 @@ start () {
 	[ $RETVAL -eq 0 ] && touch ${lockfile}
 }
 stop () {
+	[ "$EUID" != "0" ] && exit 4
 	echo -n $"Stopping $prog: "
 	killproc -p ${pidfile} /usr/bin/memcached
 	RETVAL=$?
