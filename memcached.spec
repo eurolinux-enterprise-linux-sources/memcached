@@ -1,10 +1,9 @@
 %define username   memcached
 %define groupname  memcached
-%bcond_without sasl
 
 Name:           memcached
 Version:        1.4.15
-Release:        10%{?dist}.1
+Release:        5%{?dist}
 Epoch:          0
 Summary:        High Performance, Distributed Memory Object Cache
 
@@ -18,11 +17,6 @@ Source1:        memcached.service
 
 # Patches
 Patch001:       memcached-manpages.patch
-Patch002:       memcached-CVE-2011-4971.patch
-Patch003:       memcached-CVE-2013-0179_7290_7291.patch
-Patch004:       memcached-CVE-2013-7239.patch
-Patch005:       memcached-ipv6.patch
-Patch006:       memcached-CVE-2016-8704_8705_8706.patch
 
 # Fixes
 
@@ -31,9 +25,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 BuildRequires:  libevent-devel
 BuildRequires:  perl(Test::More), perl(Test::Harness)
 BuildRequires:  systemd-units
-%{?with_sasl:BuildRequires: cyrus-sasl-devel}
-# For test suite
-%{?with_sasl:BuildRequires: cyrus-sasl-md5 cyrus-sasl-plain}
 
 Requires(post): systemd
 Requires(preun): systemd
@@ -63,20 +54,13 @@ access to the memcached binary include files.
 %prep
 %setup -q
 %patch001 -p1 -b .manpages
-%patch002 -p1 -b .CVE-2011-4971
-%patch003 -p1 -b .CVE-2013-0179_7290_7291
-%patch004 -p1 -b .CVE-2013-7239
-%patch005 -p1 -b .ipv6
-%patch006 -p1 -b .CVE-2016-8704_8705_8706
 
 %build
 # compile with full RELRO
 export CFLAGS="%{optflags} -pie -fpie"
 export LDFLAGS="-Wl,-z,relro,-z,now"
 
-%configure \
-  %{?with_sasl: --enable-sasl}
-
+%configure
 sed -i 's/-Werror/ /' Makefile
 make %{?_smp_mflags}
 
@@ -90,7 +74,7 @@ if [ `id -u` -ne 0 ]; then
   # build systems
   rm -f t/daemonize.t
 fi
-RUN_SASL_TESTS=1 make test
+make test
 
 %install
 rm -rf %{buildroot}
@@ -169,27 +153,6 @@ exit 0
 %{_includedir}/memcached/*
 
 %changelog
-* Mon Nov 07 2016 Miroslav Lichvar <mlichvar@redhat.com> - 0:1.4.15-10.el7_3.1
-- fix vulnerabilities allowing remote code execution (CVE-2016-8704,
-  CVE-2016-8705, CVE-2016-8706)
-
-* Tue Mar 08 2016 Miroslav Lichvar <mlichvar@redhat.com> - 0:1.4.15-10
-- fix binding to IPv6 address (#1298603)
-- enable SASL support (#1263696)
-- don't allow authentication with bad SASL credentials (CVE-2013-7239)
-
-* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 01.4.15-9
-- Mass rebuild 2014-01-24
-
-* Tue Jan 14 2014 Miroslav Lichvar <mlichvar@redhat.com> - 0:1.4.15-8
-- fix unbound key printing (CVE-2013-0179, CVE-2013-7290, CVE-2013-7291)
-
-* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 01.4.15-7
-- Mass rebuild 2013-12-27
-
-* Thu Dec 12 2013 Miroslav Lichvar <mlichvar@redhat.com> - 0:1.4.15-6
-- fix segfault on specially crafted packet (#988739, CVE-2011-4971)
-
 * Mon Jul 08 2013 Miroslav Lichvar <mlichvar@redhat.com> - 0:1.4.15-5
 - update memcached man page
 - add memcached-tool man page
