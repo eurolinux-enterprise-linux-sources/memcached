@@ -3,7 +3,7 @@
 
 Name:           memcached
 Version:        1.4.15
-Release:        9%{?dist}
+Release:        9%{?dist}.1
 Epoch:          0
 Summary:        High Performance, Distributed Memory Object Cache
 
@@ -19,6 +19,7 @@ Source1:        memcached.service
 Patch001:       memcached-manpages.patch
 Patch002:       memcached-CVE-2011-4971.patch
 Patch003:       memcached-CVE-2013-0179_7290_7291.patch
+Patch005:       memcached-ipv6.patch
 
 # Fixes
 
@@ -58,6 +59,7 @@ access to the memcached binary include files.
 %patch001 -p1 -b .manpages
 %patch002 -p1 -b .CVE-2011-4971
 %patch003 -p1 -b .CVE-2013-0179_7290_7291
+%patch005 -p1 -b .ipv6
 
 %build
 # compile with full RELRO
@@ -157,6 +159,9 @@ exit 0
 %{_includedir}/memcached/*
 
 %changelog
+* Thu Aug 11 2016 Miroslav Lichvar <mlichvar@redhat.com> - 0:1.4.15-9.el7_2.1
+- fix binding to IPv6 address (#1366158)
+
 * Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 01.4.15-9
 - Mass rebuild 2014-01-24
 
